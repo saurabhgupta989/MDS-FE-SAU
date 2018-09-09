@@ -1,13 +1,15 @@
 <div class="row">
-  <div class="col-md-12" style="background-color: aliceblue"></div>
+  <div class="col-md-12" style="background-color:#D5D5D5;border: 1px solid #D5D5D5">
+    <img src="../../assets/images/img2.png" width="160px" height="80px" />
+  </div>
 </div>
 
 
-<div class="row">
+<div class="row" *ngIf="isVisible">
   <div class="col-md-12">
-    <p-menubar [model]="items" [autoDisplay]="false">
-      <input type="text" pInputText placeholder="Search">
-      <button pButton label="Logout" icon="fa fa-sign-out" style="margin-left:.25em">Logout</button>
+    <p-menubar [model]="items" [autoDisplay]="true">
+      <button pButton label="Logout" icon="fa fa-sign-out"></button>
     </p-menubar>
   </div>
 </div>
+<hr>

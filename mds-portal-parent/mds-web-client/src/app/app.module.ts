@@ -17,6 +17,8 @@ import { FooterComponent } from './footer/footer.component';
 import { MenuModule } from 'primeng/menu';
 import { MenubarModule } from 'primeng/menubar';
 import { StepsModule } from 'primeng/steps';
+import {ButtonModule} from 'primeng/button';
+import { ReactiveFormsModule } from '@angular/forms'; 
 
 
 @NgModule({
@@ -34,7 +36,7 @@ import { StepsModule } from 'primeng/steps';
     FooterComponent
   ],
   imports: [
-    BrowserModule, StepsModule, HttpModule, MenuModule, MenubarModule
+    BrowserModule, HttpModule, MenuModule, MenubarModule,ButtonModule,StepsModule,ReactiveFormsModule
   ],
   providers: [MyService],
   bootstrap: [AppComponent]
