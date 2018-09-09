@@ -3,8 +3,6 @@ import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
-import { StepsModule } from '../../node_modules/primeng/steps';
-import { StepscustomModule } from '../../node_modules/primeng/stepscustom';
 import { FacilityComponent } from './facility/facility.component';
 import { FacilityTab1Component } from './facility/facility-tab1/facility-tab1.component';
 import { FacilityTab2Component } from './facility/facility-tab2/facility-tab2.component';
@@ -14,6 +12,12 @@ import { FacilityTab5Component } from './facility/facility-tab5/facility-tab5.co
 import { FacilityTab6Component } from './facility/facility-tab6/facility-tab6.component';
 import { MyService } from './service/my-service';
 import { HttpModule } from '@angular/http';
+import { HeaderComponent } from './header/header.component';
+import { FooterComponent } from './footer/footer.component';
+import { MenuModule } from 'primeng/menu';
+import { MenubarModule } from 'primeng/menubar';
+import { StepsModule } from 'primeng/steps';
+
 
 @NgModule({
   declarations: [
@@ -25,10 +29,12 @@ import { HttpModule } from '@angular/http';
     FacilityTab3Component,
     FacilityTab4Component,
     FacilityTab5Component,
-    FacilityTab6Component
+    FacilityTab6Component,
+    HeaderComponent,
+    FooterComponent
   ],
   imports: [
-    BrowserModule, StepsModule, StepscustomModule, HttpModule
+    BrowserModule, StepsModule, HttpModule, MenuModule, MenubarModule
   ],
   providers: [MyService],
   bootstrap: [AppComponent]

@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewEncapsulation, Renderer2, ElementRef, ViewChild } from '@angular/core';
-import { StepsModule } from 'primeng/steps';
+import { Steps,StepsModule } from 'primeng/steps';
 import { MenuItem } from 'primeng/api';
-import { Stepscustom } from '../../../node_modules/primeng/stepscustom';
 import { MyService } from '../service/my-service';
 
 @Component({
@@ -19,14 +18,14 @@ export class LoginComponent implements OnInit {
   constructor(private renderer: Renderer2, public _myService: MyService) { }
 
   ngOnInit() {
-    this.items = [{ label: 'step1' }, { label: 'step2' }, { label: 'step3' }, { label: 'step4' },
-    { label: 'step5' }, { label: 'step6' }];
+    this.items = [{ label: 'step1' }, { label: 'step2' }, { label: 'step3' }, { label: 'step4' }];
   }
 
 
   nextStepPlease() {
     this.activeIndex++;
-    Stepscustom.prototype.itemClick(event, Stepscustom.prototype, this.activeIndex, true, true);
+    Steps.prototype.itemClick(event, Steps.prototype, this.activeIndex, true, true);
+
     let lists = this.elRef2.nativeElement.querySelectorAll('li');
     for (let i = 0; i <= this.activeIndex - 1; i++) {
       this.renderer.setStyle(lists[i], 'background', 'green');
