@@ -1,127 +1,154 @@
 package com.mds.controller;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import com.mds.model.TokenResponse;
 import com.mds.service.RouteService;
+import com.mds.util.VerifyTokenUtil;
+
+import static com.mds.util.RouterUtil.getBackendURL;
+import static com.mds.util.RouterUtil.getBackendURLWithQueryString;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-@RestController(value = "api")
+@RestController
+@RequestMapping("api")
 public class RouteController {
 
 	@Autowired
 	private RouteService routeService;
 
-	@GetMapping(value = "/fe/test", produces = "application/json")
-	public ResponseEntity<Object> index() {
-		Map<String, List<Integer>> map = new HashMap<>();
-		List<Integer> list = new ArrayList<>();
-		list.add(1);
-		list.add(2);
-		list.add(3);
-		map.put("feName", list);
+	@Autowired
+	private Environment env;
+
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+	@GetMapping(value = "/get/{urlKey}", produces = "application/json")
+	public ResponseEntity<Object> handleGetRequest(@PathVariable("urlKey") String urlKey, HttpServletRequest request) {
+
+		logger.debug("handleGetRequest service called");
+		logger.info("handleGetRequest service called");
+
 		ResponseEntity<Object> response = null;
-		response = new ResponseEntity<Object>(map, HttpStatus.OK);
-		return response;
-	}
+		Map<String, Object> map = new HashMap<>();
 
-	@GetMapping(value = "/get/*", produces = "application/json")
-	public ResponseEntity<Object> handleGetRequests() {
+		String beUrl = getBackendURL(env, urlKey);
 
-		routeService.handleGetRequests();
-		ResponseEntity<Object> response = null;
-		response = new ResponseEntity<Object>(null, HttpStatus.OK);
-		return response;
-	}
+		String queryString = request.getQueryString();
+		if (queryString != null) {
+			logger.debug("Query String is present " + queryString);
+			beUrl = getBackendURLWithQueryString(queryString, beUrl);
+		} else {
+			logger.debug("Query String not present");
+		}
 
-	@GetMapping(value = "/post/*", produces = "application/json")
-	public ResponseEntity<Object> handlePostRequests() {
-		Map<String, List<Integer>> map = new HashMap<>();
-		List<Integer> list = new ArrayList<>();
-		list.add(1);
-		list.add(2);
-		list.add(3);
-		map.put("feName", list);
-		ResponseEntity<Object> response = null;
-		response = new ResponseEntity<Object>(map, HttpStatus.OK);
-		return response;
-	}
+		if (beUrl == null || beUrl.equals("")) {
+			map.put("message", "GET : BE url is null");
+			response = new ResponseEntity<>(map, null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return response;
+		}
+		try {
 
-	public String demo(List<Integer> andrea, List<Integer> maria, String s) {
-		List<Integer> andreaScore = new ArrayList<>();
-		List<Integer> mariaScore = new ArrayList<>();
-		if (s.equals("EVEN")) {
-			for (int i = 0; i < andrea.size(); i++) {
-				if (i % 2 == 0) {
-					andreaScore.add(andrea.get(i));
-					mariaScore.add(andrea.get(i));
-				}
-			}
-
-			Integer scoreOfAndrea = 0, scoreOfMaria = 0;
-			for (int i = 0; i < andreaScore.size(); i++) {
-				scoreOfAndrea = scoreOfAndrea + andreaScore.get(i);
-				scoreOfMaria = scoreOfMaria + mariaScore.get(i);
-			}
-			if ((scoreOfAndrea - scoreOfMaria) > (scoreOfMaria - scoreOfAndrea)) {
-				return "Andrea";
+			if (request.getHeader("token") == null) {
+				logger.debug("Token is not present");
 			} else {
-				return "Maris";
+				logger.debug("Token is present");
 			}
 
-		} else if (s.equals("ODD")) {
-
-		}
-
-		return null;
-	}
-
-	public Integer max(int[] rating) {
-		int posNumner = 0;
-		int[] myArray = new int[rating.length];
-		int j = 0;
-		for (int i = 0; i < rating.length; i++) {
-			if (rating[i] > 0) {
-				posNumner = posNumner + rating[i];
+			if (VerifyTokenUtil.verifyToken(request, request.getHeader("token"), env.getProperty("secretKey"))) {
+				response = routeService.handleGetRequests(beUrl, HttpMethod.GET);
+				logger.debug("GET: Response recieved from BE");
+				return response;
 			} else {
-				myArray[j] = rating[i];
+				map.put("message", "Token is not verified");
+				response = new ResponseEntity<>(map, null, HttpStatus.INTERNAL_SERVER_ERROR);
+				return response;
 			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			response = new ResponseEntity<>(e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return response;
 		}
-		int[] index = new int[rating.length];
-		Arrays.sort(myArray);
-		for (int i = 0; i < myArray.length; i++) {
-			index[i] = this.getArrayIndex(rating, myArray[i]);
-		}
-
-		int max = Arrays.stream(index).max().getAsInt();
-		int[] sum = new int[index.length];
-		int temp = 0;
-		for (int i = 0; i < index.length; i++) {
-			for (int k = index[i]; k <= max; k++) {
-
-				temp = temp + myArray[k];
-
-			}
-		}
-
-		return null;
 	}
 
-	public int getArrayIndex(int[] arr, int value) {
-		for (int i = 0; i < arr.length; i++)
-			if (arr[i] == value)
-				return i;
-		return -1;
+	@PostMapping(value = "/post/{urlKey}", produces = "application/json")
+	public ResponseEntity<Object> handlePostRequest(@PathVariable("urlKey") String urlKey, HttpServletRequest request,
+			@RequestBody Object requestBody) {
+
+		logger.debug("handlePostRequest service called");
+		logger.info("handlePostRequest service called");
+
+		ResponseEntity<Object> response = null;
+		Map<String, Object> map = new HashMap<>();
+
+		String beUrl = getBackendURL(env, urlKey);
+
+		if (beUrl == null || beUrl.equals("")) {
+			map.put("message", "GET : BE url is null");
+			response = new ResponseEntity<>(map, null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return response;
+		}
+		try {
+
+			if (request.getHeader("token") == null) {
+				logger.debug("Token is not present");
+			} else {
+				logger.debug("Token is present");
+			}
+
+			if (VerifyTokenUtil.verifyToken(request, request.getHeader("token"), env.getProperty("secretKey"))) {
+				response = routeService.handlePostRequests(beUrl, HttpMethod.POST, request, requestBody);
+				logger.debug("GET: Response recieved from BE");
+				return response;
+			} else {
+				map.put("message", "Token is not verified");
+				response = new ResponseEntity<>(map, null, HttpStatus.INTERNAL_SERVER_ERROR);
+				return response;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			response = new ResponseEntity<>(e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return response;
+		}
+	}
+
+	@PostMapping(value = "/login", produces = "application/json")
+	public ResponseEntity<Object> login(HttpServletRequest request) {
+
+		logger.debug("login service called");
+		logger.info("login service called");
+
+		String token = null;
+		ResponseEntity<Object> response = null;
+		TokenResponse responseObj = new TokenResponse();
+		try {
+			token = VerifyTokenUtil.generateJWTToken(request, env.getProperty("secretKey"));
+			responseObj.setToken(token);
+			response = new ResponseEntity<>(responseObj, null, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			response = new ResponseEntity<>(e.getMessage(), null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return response;
+
 	}
 
 }
