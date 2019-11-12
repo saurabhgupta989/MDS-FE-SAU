@@ -1,0 +1,13 @@
+.ui-corner-all {
+    border-radius: 0px;
+}
+
+.ui-widget-content {
+    border: 0px solid #D5D5D5;
+    background-color: #ffffff;
+    color: #222222;
+}
+
+.match-color{
+    background-color: #ffffff;
+}

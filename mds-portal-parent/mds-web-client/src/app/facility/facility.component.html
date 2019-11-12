@@ -1,0 +1,25 @@
+<div class="row">
+  <div class="col-md-12">
+    <div #stepsDiv>
+      <p-steps [model]="items" [(activeIndex)]="activeIndex" [readonly]="true" [isPreviousTabClickable]="true" [hideStepNumber]="true"></p-steps>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="row">
+  <div class="col-md-12">
+    <app-facility-tab1 *ngIf="activeIndex===0"></app-facility-tab1>
+    <app-facility-tab2 *ngIf="activeIndex===1"></app-facility-tab2>
+    <app-facility-tab3 *ngIf="activeIndex===2"></app-facility-tab3>
+    <app-facility-tab4 *ngIf="activeIndex===3"></app-facility-tab4>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <p-button label="Next" (click)="nextStepPlease()" *ngIf="activeIndex!==3"></p-button>
+    <p-button label="Submit" (click)="submit()" *ngIf="activeIndex===3"></p-button>
+  </div>
+</div>
